@@ -186,6 +186,9 @@ data_completa$g_modelo_veh <- ifelse(
                                                    ifelse(data_completa$modelo_veh >= 2010 & data_completa$modelo_veh <= 2019, 5,
                                                           ifelse(data_completa$modelo_veh >= 2020 & data_completa$modelo_veh <= 2029, 6, 99))))))
 
+# Elimino la columna 'num_corre' porque solo es un identificador secuencial
+data_completa<-data_completa[,-1]
+
 
 
 #Eliminamos los df de 2009-2024 para liberer RAM
@@ -202,25 +205,47 @@ rm(data_2024, data_2023, data_2022, data_2021, data_2020,data_2019, data_2018, d
 
 
 
+#----------------ALGORITMO APRIORI--------------------------
+#-----------------------------------------------------------
+
+#Data del departamento de Guatemala
+data_gt <- subset(data_completa,depto_ocu==1)
+data.frame(1:ncol(data_gt), colnames(data_gt))
+data_gt<-data_gt[,-9]
+
+#Patrón 1: Hechos de transito en las horas pico en Guatemala
+aprio_p1 <- subset(data_gt, (hora_ocu >= 5 & hora_ocu <= 9) | (hora_ocu >= 16 & hora_ocu <= 20))
+aprio_p1 <- aprio_p1[, c("g_hora_5","mes_ocu","dia_sem_ocu","tipo_veh","tipo_eve")]
+reglas_apr_p1 <- apriori(aprio_p1, parameter = list(support=0.25, confidence = 0.45)) 
+inspect(reglas_apr_p1[0:23])
+
+
+#Patron 2: Hecho de transito provocados por el tipo de vehiculo: Motocicleta a nivel general
+aprio_p2 <- subset(data_completa, tipo_veh==4)
+aprio_p2 <- aprio_p2[, c("g_hora_5", "tipo_eve","mes_ocu","dia_sem_ocu","depto_ocu")]
+reglas_apr_p2 <- apriori(aprio_p2, parameter = list(support=0.20, confidence = 0.45))
+inspect(reglas_apr_p2[0:17])
 
 
 
-
-data_2013 <- read_excel(paste0(ruta,"hechos-de-transito-ano-2013.xlsx"))
-data_2013$año_ocu <-2013
-
-data_2013$g_hora_5 <- ifelse(
-                            data_2013$g_hora %in% c(1, 2), 1,
-                            ifelse(data_2013$g_hora == 3, 2,
-                            ifelse(data_2013$g_hora == 4, 3, 4)
-                            ))
+#Patron 3: Hecho de transito en zonas activas en los fines de semana en Guatemala
+aprio_p3 <- subset(data_gt, zona_ocu %in% c(4,10,15,1) & dia_sem_ocu %in% c(6,7))
+aprio_p3 <- aprio_p3[, c("mes_ocu", "g_hora", "tipo_veh", "tipo_eve")]
+reglas_apr_p3 <- apriori(aprio_p3, parameter = list(support=0.20, confidence=0.45))
+inspect(reglas_apr_p3[0:23])
 
 
-data_2014$g_modelo_veh <- ifelse(
-                                  data_2014$modelo_veh >= 1970 & data_2014$modelo_veh <= 1979, 1,
-                                  ifelse(data_2014$modelo_veh >= 1980 & data_2014$modelo_veh <= 1989, 2,
-                                         ifelse(data_2014$modelo_veh >= 1990 & data_2014$modelo_veh <= 1999, 3,
-                                                ifelse(data_2014$modelo_veh >= 2000 & data_2014$modelo_veh <= 2009, 4,
-                                                       ifelse(data_2014$modelo_veh >= 2010 & data_2014$modelo_veh <= 2019, 5,
-                                                              ifelse(data_2014$modelo_veh >= 2020 & data_2014$modelo_veh <= 2029, 6, 99)
-                                                       )))))
+#Patron 4: Hechos de transito cuando es atropello a nivel general
+aprio_p4 <- subset(data_completa, tipo_eve == 5)
+aprio_p4 <- aprio_p4[, c("mes_ocu", "g_hora","tipo_veh","depto_ocu")]
+reglas_apr_p4 <- apriori(aprio_p4, parameter = list(support=0.10, confidence = 0.35))
+inspect(reglas_apr_p4[0:42])
+
+
+#Patron 5: Hechos de transito en el Municipio de San Miguel Petapa, Guatemala
+aprio_p5 <- subset(data_completa, mupio_ocu == 117)
+aprio_p5 <- aprio_p5[, c("g_hora","mes_ocu","dia_sem_ocu","tipo_veh","tipo_eve")]
+reglas_apr_p5 <- apriori(aprio_p5, parameter = list(support=0.20, confidence=0.45))
+inspect(reglas_apr_p5[0:37])
+
+
