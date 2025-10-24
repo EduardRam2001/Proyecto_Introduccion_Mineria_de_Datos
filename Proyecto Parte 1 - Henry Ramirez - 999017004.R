@@ -191,6 +191,8 @@ data_completa<-data_completa[,-1]
 
 
 
+
+
 #Eliminamos los df de 2009-2024 para liberer RAM
 rm(data_2024, data_2023, data_2022, data_2021, data_2020,data_2019, data_2018, data_2017, data_2016, data_2015,
    data_2014, data_2013, data_2012, data_2011, data_2010, data_2009)
@@ -249,3 +251,63 @@ reglas_apr_p5 <- apriori(aprio_p5, parameter = list(support=0.20, confidence=0.4
 inspect(reglas_apr_p5[0:37])
 
 
+
+
+
+
+
+
+
+
+
+
+
+#----------------ALGORITMO FP-GROWTH------------------------
+#-----------------------------------------------------------
+
+#Patron 1: Hechos de transito en temporada de lluvia (junio a octubre)
+fp_p1 <- subset(data_completa, mes_ocu %in% c(6,7,8,9,10))
+fp_p1 <- fp_p1[, c("mes_ocu","depto_ocu","g_hora_5","color_veh","tipo_veh","tipo_eve")]
+reglas_fp_p1 <- fim4r(fp_p1, method="fpgrowth", target ="rules", supp =.2, conf=.5)
+rf_fp_p1 <- as(reglas_fp_p1, "data.frame")
+
+
+
+#Patron 2: Hechos de transito con vehículos nuevos (modelos recientes)
+fp_p2 <- subset(data_completa, g_modelo_veh ==6)
+fp_p2 <- fp_p2[, c("dia_sem_ocu","marca_veh","g_hora_5","tipo_veh","tipo_eve")]
+reglas_fp_p2 <- fim4r(fp_p2, method="fpgrowth", target ="rules", supp =.2, conf=.5)
+rf_fp_p2 <- as(reglas_fp_p2, "data.frame")
+
+
+
+
+#Patron 3: Hechos de transito ocurrido en la noche.
+fp_p3 <- subset(data_completa, g_hora_5 ==3)
+fp_p3 <- fp_p3[, c("mes_ocu","depto_ocu","color_veh","tipo_veh","tipo_eve")]
+reglas_fp_p3 <- fim4r(fp_p3, method="fpgrowth", target ="rules", supp =.2, conf=.5)
+rf_fp_p3 <- as(reglas_fp_p3, "data.frame")
+
+
+
+
+#Patron 4: Hechos de tránsito relacionados segun el color del vehículo (Claro, oscuro, vivo, Varios)
+fp_p4 <- subset(data_completa, color_veh <=17)
+
+fp_p4$grupo_color <- ifelse(fp_p4$color_veh %in% c(3,4,5,9,10,15), "Oscuro",
+                            ifelse(fp_p4$color_veh %in% c(2,8,11,12,13,16), "Claro",
+                                   ifelse(fp_p4$color_veh %in% c(1,6,7,14), "Vivo",
+                                          ifelse(fp_p4$color_veh == 17, "Varios", NA))))
+
+fp_p4 <- fp_p4[, c("grupo_color", "g_hora_5", "tipo_eve")]
+reglas_fp_p4 <- fim4r(fp_p4, method="fpgrowth", target ="rules", supp =.2, conf=.5)
+rf_fp_p4 <- as(reglas_fp_p4, "data.frame")
+
+
+
+
+#Patron 5: Hechos de transito provocados por los buses extraurbano
+fp_p5 <- subset(data_completa, tipo_veh  ==7)
+fp_p5 <- fp_p5[, c("mes_ocu","depto_ocu","g_hora_5","tipo_eve")]
+reglas_fp_p5 <- fim4r(fp_p5, method="fpgrowth", target ="rules", supp =.2, conf=.5)
+rf_fp_p5 <- as(reglas_fp_p5, "data.frame")
