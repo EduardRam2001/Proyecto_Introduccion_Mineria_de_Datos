@@ -3,8 +3,8 @@ library(readxl)
 library(arules)
 library(fim4r)
 library(ggplot2)
-library(ggalt)
 library(dplyr)
+library(ggalt)
 
 #Ruta de la data
 ruta<-"C:\\Users\\hedua\\OneDrive\\Escritorio\\MAESTRIA\\4to Trimestre\\INTRO. MINERIA DE DATOS\\Proyecto_Introduccion_Mineria_de_Datos\\DATA\\"
