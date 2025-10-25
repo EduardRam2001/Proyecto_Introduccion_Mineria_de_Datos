@@ -16,9 +16,10 @@ ruta<-"C:\\Users\\hedua\\OneDrive\\Escritorio\\MAESTRIA\\4to Trimestre\\INTRO. M
 
 
 
-#--Para la data de 2015-2024 se debe realizar cierta limpieza.
-#--Tomar las columnas de forma ordenada tomando como referencia la data de 2024
-#--Colocar el nombre de las columnas iguales para todos los df.
+# Para los años 2015-2024:
+# - Se toma como referencia la estructura de columnas del archivo de 2024.
+# - Se asignan nombres consistentes a todas las columnas de los dataframes de cada año.
+# - Se reordenan las columnas para que todos los dataframes tengan la misma estructura.
 
 name_columns <- c("num_correlativo","anio_ocu","dia_ocu","hora_ocu","g_hora","g_hora_5",
                   "mes_ocu","dia_sem_ocu","mupio_ocu","depto_ocu","zona_ocu","tipo_veh",
@@ -32,7 +33,7 @@ names(data_2024) <- name_columns
 data_2023 <- read_excel(paste0(ruta,"hechos-de-transito-ano-2023.xlsx"))
 names(data_2023) <- name_columns
 
-data_2022 <- read_excel(paste0(ruta,"hechos-de-transito-ano-2022.xlsx"))
+data_2022 <- read_excel(paste0(ruta,"hechos-de-transito-ano-2022.xlsx"))  
 names(data_2022) <- name_columns
 
 data_2021 <- read_excel(paste0(ruta,"hechos-de-transito-ano-2021.xlsx"))
@@ -68,8 +69,12 @@ names(data_2015) <- name_columns
 
 
 
-#--Para la data de 2009-2014 se debe realizar cierta limpieza y agregar columnas que no tiene la data
-#--Esas columnas que se va agregar se tomara como valor 'Ignorado' de momento
+
+# Para los años 2009-2014:
+# - Se realiza limpieza y se agregan columnas que no existen en estos archivos.
+# - Las columnas agregadas se llenan con el valor por defecto "IGNORADO"
+#   (representado numéricamente según el diccionario de datos).
+# - Se reordenan las columnas para que coincidan con la estructura de los años 2015-2024.
 
 data_2014 <- read_excel(paste0(ruta,"hechos-de-transito-ano-2014.xlsx"))
 data_2014$año_ocu <-2014
@@ -162,8 +167,10 @@ data_completa <- bind_rows(data_2024, data_2023, data_2022, data_2021, data_2020
                            data_2009)
 
 
-# Valores por defecto se reemplazan por condiciones basadas en el diccionario de datos.
-# Solo se aplican condiciones a g_hora, g_hora_5 y g_modelo_veh, ya que dependen de otros campos.
+
+# Reemplazo de valores por defecto "IGNORADO" según el diccionario de datos:
+# - Solo se aplican condiciones a las columnas g_hora, g_hora_5 y g_modelo_veh,
+#   ya que sus valores dependen de la información de otros campos.
 data_completa$g_hora <- ifelse(
                               data_completa$hora_ocu >= 0 & data_completa$hora_ocu <= 5, 1,
                               ifelse(data_completa$hora_ocu >= 6 & data_completa$hora_ocu <= 11, 2,
@@ -186,16 +193,22 @@ data_completa$g_modelo_veh <- ifelse(
                                                    ifelse(data_completa$modelo_veh >= 2010 & data_completa$modelo_veh <= 2019, 5,
                                                           ifelse(data_completa$modelo_veh >= 2020 & data_completa$modelo_veh <= 2029, 6, 99))))))
 
-# Elimino la columna 'num_corre' porque solo es un identificador secuencial
+
+
+# Eliminación de columna innecesaria:
+# La columna 'num_corre' se elimina porque solo sirve como identificador secuencial
 data_completa<-data_completa[,-1]
 
 
 
 
 
-#Eliminamos los df de 2009-2024 para liberer RAM
+# Liberar memoria RAM:
+# Se eliminan los dataframes individuales de cada año (2009-2024) 
+# para mejorar el rendimiento durante la ejecución del proyecto
 rm(data_2024, data_2023, data_2022, data_2021, data_2020,data_2019, data_2018, data_2017, data_2016, data_2015,
    data_2014, data_2013, data_2012, data_2011, data_2010, data_2009)
+
 
 
 
