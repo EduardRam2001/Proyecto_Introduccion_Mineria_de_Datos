@@ -311,3 +311,162 @@ fp_p5 <- subset(data_completa, tipo_veh  ==7)
 fp_p5 <- fp_p5[, c("mes_ocu","depto_ocu","g_hora_5","tipo_eve")]
 reglas_fp_p5 <- fim4r(fp_p5, method="fpgrowth", target ="rules", supp =.2, conf=.5)
 rf_fp_p5 <- as(reglas_fp_p5, "data.frame")
+
+
+
+
+
+#----------------ALGORITMO K-MEANS--------------------------
+#-----------------------------------------------------------
+
+#Cluster 1: Hechos de tránsito por el modelo del vehículo (1970-2030) y hora de ocurrencia (0-24 hrs)
+km_c1 <- subset(data_completa, (modelo_veh >= 1970 & modelo_veh <= 2030) & (hora_ocu >= 0 & hora_ocu <= 24))
+km_c1 <- km_c1[, c("modelo_veh","color_veh","hora_ocu","g_hora_5","tipo_eve")]
+
+cluster_1 <- kmeans(km_c1, centers = 6)
+
+
+
+ggplot(km_c1, aes(x = modelo_veh, y = hora_ocu, color = as.factor(cluster_1$cluster))) +
+  geom_point(size = 2, alpha = 0.7, shape = 16) +
+  geom_point(data = as.data.frame(cluster_1$centers),
+             aes(x = modelo_veh, y = hora_ocu),
+             color = "black", size = 4, shape = 17) +
+  geom_encircle(aes(group = cluster_1$cluster, fill = as.factor(cluster_1$cluster)),
+                alpha = 0.08, s_shape = 1, expand = 0.05) +
+  scale_color_manual(values = c("red", "green", "blue", "purple", "orange", "cyan")) +
+  scale_fill_manual(values = c("red", "green", "blue", "purple", "orange", "cyan")) + # 
+  labs(title = "Hechos de tránsito por modelo del vehículo y hora de ocurrencia",
+       x = "Año de vehículo",
+       y = "Hora de ocurrencia") +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    legend.position = "right",
+    legend.title = element_blank()
+  )
+
+
+
+
+
+
+#Cluster 2: Hechos de tránsito por automóviles en el departamento de Guatemala
+km_c2 <- subset(data_completa, (hora_ocu >= 0 & hora_ocu <= 24)  & tipo_eve<=8 & depto_ocu==1 & tipo_veh == 1)
+km_c2 <- km_c2[, c("hora_ocu", "g_hora_5", "tipo_eve")]
+cluster_2 <- kmeans(km_c2, centers = 6)
+
+
+
+ggplot(km_c2, aes(x = tipo_eve, y = hora_ocu, color = as.factor(cluster_2$cluster))) +
+  geom_point(size = 2, alpha = 0.7, shape = 16) +
+  geom_point(data = as.data.frame(cluster_2$centers),
+             aes(x = tipo_eve, y = hora_ocu),
+             color = "black", size = 4, shape = 17) +
+  geom_encircle(aes(group = cluster_2$cluster, fill = as.factor(cluster_2$cluster)),
+                alpha = 0.08, s_shape = 1, expand = 0.05) +
+  scale_color_manual(values = c("red", "green", "blue", "purple", "orange", "cyan")) +
+  scale_fill_manual(values = c("red", "green", "blue", "purple", "orange", "cyan")) + 
+  labs(title = "Hechos de tránsito por tipo de evento y hora de ocurrencia",
+       x = "Tipo de evento",
+       y = "Hora de ocurrencia") +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    legend.position = "right",
+    legend.title = element_blank()
+  )
+
+
+
+
+
+#Cluster 3: Hechos de tránsito por año de ocurrencia y modelo del vehículo
+km_c3 <- subset(data_completa,modelo_veh >= 1970 & modelo_veh <= 2030)
+km_c3 <- km_c3[, c("anio_ocu","mes_ocu", "modelo_veh")]
+cluster_3 <- kmeans(km_c3, centers = 6)
+
+
+ggplot(km_c3, aes(x = anio_ocu, y = modelo_veh, color = as.factor(cluster_3$cluster))) +
+  geom_point(size = 2, alpha = 0.7, shape = 16) +
+  geom_point(data = as.data.frame(cluster_3$centers),
+             aes(x = anio_ocu, y = modelo_veh),
+             color = "black", size = 4, shape = 17) +
+  geom_encircle(aes(group = cluster_3$cluster, fill = as.factor(cluster_3$cluster)),
+                alpha = 0.05, s_shape = 1, expand = 0.05) +
+  scale_color_manual(values = c("red", "blue", "green", "gray","yellow","cyan")) +
+  scale_fill_manual(values = c("red", "blue", "green", "gray","yellow","cyan")) + 
+  labs(
+    title = "Hechos de tránsito por año de ocurrencia y modelo del vehículo",
+    x = "Año de ocurrencia",
+    y = "Modelo del vehículo"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    legend.position = "right",
+    legend.title = element_blank()
+  )
+
+
+
+
+
+
+#Cluster 4: Hechos de tránsito por modelo del vehiculo  y marca del vehiculo
+km_c4 <- subset(data_completa,(modelo_veh >= 1970 & modelo_veh <= 2030) &  tipo_eve<=8 & marca_veh!=999 )
+km_c4 <- km_c4[, c("anio_ocu", "modelo_veh","tipo_eve","marca_veh")]
+cluster_4 <- kmeans(km_c4, centers = 6)
+
+
+ggplot(km_c4, aes(x = modelo_veh, y = marca_veh, color = as.factor(cluster_4$cluster))) +
+  geom_point(size = 2, alpha = 0.7, shape = 16) +
+  geom_point(data = as.data.frame(cluster_4$centers),
+             aes(x = modelo_veh, y = marca_veh),
+             color = "black", size = 4, shape = 17) +
+  geom_encircle(aes(group = cluster_4$cluster, fill = as.factor(cluster_4$cluster)),
+                alpha = 0.05, s_shape = 1, expand = 0.05) +
+  scale_color_manual(values = c("red", "green", "blue", "purple", "orange", "cyan")) +
+  scale_fill_manual(values = c("red", "green", "blue", "purple", "orange", "cyan")) +
+  labs(
+    title = "Hechos de tránsito por modelo del vehiculo y marca del vehiculo",
+    x = "Modelo del vehículo",
+    y = "Marca del Vehiculo"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    legend.position = "right",
+    legend.title = element_blank()
+  )
+
+
+
+
+
+#Cluster 5: Hechos de tránsito por modelo del vehiculo  y tipo de evento
+km_c5 <- subset(data_completa,(modelo_veh >= 1970 & modelo_veh <= 2030) &  tipo_eve<=8)
+km_c5 <- km_c5[, c("anio_ocu", "modelo_veh","tipo_eve")]
+cluster_5 <- kmeans(km_c5, centers = 8)
+
+
+ggplot(km_c5, aes(x = modelo_veh, y = tipo_eve, color = as.factor(cluster_5$cluster))) +
+  geom_point(size = 2, alpha = 0.7, shape = 16) +
+  geom_point(data = as.data.frame(cluster_5$centers),
+             aes(x = modelo_veh, y = tipo_eve),
+             color = "black", size = 4, shape = 17) +
+  geom_encircle(aes(group = cluster_5$cluster, fill = as.factor(cluster_5$cluster)),
+                alpha = 0.05, s_shape = 1, expand = 0.05) +
+  scale_color_manual(values = c("red", "green", "blue", "purple", "orange", "cyan","yellow","gray")) +
+  scale_fill_manual(values = c("red", "green", "blue", "purple", "orange", "cyan","yellow","gray")) +
+  labs(
+    title = "Hechos de tránsito por modelo del vehiculo y tipo de evento",
+    x = "Modelo del vehículo",
+    y = "Tipo de evento"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    legend.position = "right",
+    legend.title = element_blank()
+  )
