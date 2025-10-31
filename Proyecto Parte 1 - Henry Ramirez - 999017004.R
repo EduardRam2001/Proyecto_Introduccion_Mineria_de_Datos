@@ -26,7 +26,9 @@ ruta<-"C:\\Users\\hedua\\OneDrive\\Escritorio\\MAESTRIA\\4to Trimestre\\INTRO. M
 #----------------------LIMPIEZA DE LOS DATOS-------------------------------
 #---------------------------------------------------------------------------
 
-
+# Nota: Este bloque (líneas 38 a 224) puede ejecutarse de manera continua sin necesidad de hacerlo línea por línea.
+# Al ejecutar el bloque completo, se aplican todas las transformaciones, 
+# normalizaciones y unificación de columnas para los datos de los años 2015-2024. 
 
 # Para los años 2015-2024:
 # - Se toma como referencia la estructura de columnas del archivo de 2024.
@@ -235,6 +237,13 @@ rm(data_2024, data_2023, data_2022, data_2021, data_2020,data_2019, data_2018, d
 #-----------------------ALGORITMO APRIORI-----------------------------------
 #---------------------------------------------------------------------------
 
+# Nota general:
+# 1. Se recomienda ejecutar primero la creación de 'data_gt' para los patrones que dependen
+#    del departamento de Guatemala (Patrón 1 y Patrón 3).
+# 2. Cada patrón (Patrón 1, ..., Patrón 5) está separado y puede ejecutarse de forma individual.
+#    Esto permite visualizar y analizar los resultados de cada patrón por separado.
+
+
 #Data del departamento de Guatemala
 data_gt <- subset(data_completa,depto_ocu==1)
 data.frame(1:ncol(data_gt), colnames(data_gt))
@@ -291,6 +300,10 @@ inspect(reglas_apr_p5[0:37])
 #---------------------------------------------------------------------------
 #-----------------------ALGORITMO FP-GROWTH---------------------------------
 #---------------------------------------------------------------------------
+
+# Nota general:
+# Cada patrón (Patrón 1, ..., Patrón 5) está separado y puede ejecutarse de forma individual.
+# Esto permite visualizar y analizar los resultados de cada patrón por separado.
 
 #Patron 1:  Hechos de tránsito en temporada de lluvias (junio-octubre) 
 fp_p1 <- subset(data_completa, mes_ocu %in% c(6,7,8,9,10))
@@ -353,6 +366,10 @@ rf_fp_p5 <- as(reglas_fp_p5, "data.frame")
 #---------------------------------------------------------------------------
 #------------------------ALGORITMO K-MEANS---------------------------------
 #---------------------------------------------------------------------------
+
+# Nota general:
+# Cada cluster (Cluster 1, ..., Cluster 5) está separado y puede ejecutarse de forma individual.
+# Esto permite visualizar y analizar los resultados de cada cluster por separado.
 
 #Cluster 1: Hechos de tránsito por modelo de vehículo y hora de ocurrencia 
 km_c1 <- subset(data_completa, (modelo_veh >= 1970 & modelo_veh <= 2030) & (hora_ocu >= 0 & hora_ocu <= 24))

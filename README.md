@@ -82,10 +82,10 @@ install.packages("nombre_libreria")
      ```
 
 4. **Ejecutar los scripts de análisis de forma secuencial**  
-   - Ejecutar el bloque **“LIMPIEZA DE DATOS”**, que incluye la lectura de todos los archivos (2009-2024), la unificación de las columnas y la creación del dataframe final.
-   - Ejecutar el bloque **ALGORITMO APRIORI**, que genera las reglas de asociación.  
-   - Ejecutar el bloque **ALGORITMO FP-GROWTH**, que genera las reglas de asociación.  
-   - Ejecutar el bloque **ALGORITMO K-MEANS** , que realiza el análisis de clustering.  
+   - Ejecutar el bloque **“LIMPIEZA DE DATOS”** (líneas 37 a 223), que incluye la lectura de todos los archivos (2009-2024), la unificación de las columnas y la creación del dataframe final.
+   - Ejecutar el bloque **ALGORITMO APRIORI**, donde cada patrón (Patrón 1, Patrón 2, ..., Patrón 5) se ejecuta de forma independiente para generar sus reglas de asociación.  
+   - Ejecutar el bloque **ALGORITMO FP-GROWTH**, donde cada patrón (Patrón 1, Patrón 2, ..., Patrón 5) se ejecuta de forma independiente para generar sus reglas de asociación.  
+   - Ejecutar el bloque **ALGORITMO K-MEANS**, donde cada cluster (Cluster 1, Cluster 2, ..., Cluster 5) se ejecuta de forma independiente para realizar su análisis de agrupamiento. 
 
 
 > Cada sección de análisis está identificada y separada en los scripts para facilitar la ejecución y visualización de resultados.
