@@ -33,7 +33,7 @@ Todos los archivos se encuentran en la carpeta `DATA` del proyecto.
 
 ## Ruta de la data
 
-Antes de ejecutar los scripts, asegúrate de que la variable `ruta` (definida en la **línea 10**) apunte a la ubicación donde se encuentran los archivos Excel.  
+Antes de ejecutar los scripts, asegúrate de que la variable `ruta` (definida en la **línea 22**) apunte a la ubicación donde se encuentran los archivos Excel.  
 Cambia la ruta según corresponda a tu equipo:
 
 ```r
@@ -81,19 +81,11 @@ install.packages("nombre_libreria")
      ruta <- "C:\\Users\\hedua\\OneDrive\\Escritorio\\MAESTRIA\\4to Trimestre\\INTRO. MINERIA DE DATOS\\Proyecto_Introduccion_Mineria_de_Datos\\DATA\\"
      ```
 
-4. **Cargar los archivos Excel**  
-   - Utilizar `read_excel()` para cada archivo de datos según el año:  
-     ```r
-     data_2024 <- read_excel(paste0(ruta,"hechos-de-transito-ano-2024.xlsx"))
-     data_2023 <- read_excel(paste0(ruta,"hechos-de-transito-ano-2023.xlsx"))
-     # y así sucesivamente hasta 2009
-     ```
-
-5. **Ejecutar los scripts de análisis de forma secuencial**  
-   - Cargar los datos en orden cronológico (2009-2024).  
-   - Ejecutar el algoritmo **Apriori** para reglas de asociación.  
-   - Ejecutar el algoritmo **FP-Growth** para reglas de asociación.  
-   - Ejecutar **K-Means** para análisis de clustering.  
+4. **Ejecutar los scripts de análisis de forma secuencial**  
+   - Ejecutar el bloque **“LIMPIEZA DE DATOS”**, que incluye la lectura de todos los archivos (2009-2024), la unificación de las columnas y la creación del dataframe final.
+   - Ejecutar el bloque **ALGORITMO APRIORI**, que genera las reglas de asociación.  
+   - Ejecutar el bloque **ALGORITMO FP-GROWTH**, que genera las reglas de asociación.  
+   - Ejecutar el bloque **ALGORITMO K-MEANS** , que realiza el análisis de clustering.  
 
 
 > Cada sección de análisis está identificada y separada en los scripts para facilitar la ejecución y visualización de resultados.
@@ -133,5 +125,5 @@ install.packages("nombre_libreria")
 ## Requisitos técnicos
 
 - R versión 4.3.2
-- Carpeta `DATA` con los archivos Excel.
+- Carpeta `DATA` con los archivos en formato Excel.
 - Librerías instaladas según lo indicado.

@@ -1,3 +1,12 @@
+#instalacion de librerias
+#install.packages("readxl")
+#install.packages("arules")
+#install.packages("ggplot2")
+#install.packages("dplyr")
+#install.packages("ggalt")
+
+
+
 #Carga de librerias
 library(readxl)
 library(arules)
@@ -6,13 +15,16 @@ library(ggplot2)
 library(dplyr)
 library(ggalt)
 
-#Ruta de la data
+
+# NOTA IMPORTANTE:
+# Antes de ejecutar el script, CAMBIA la siguiente ruta según la ubicación
+# de la carpeta "DATA" en tu computadora.
 ruta<-"C:\\Users\\hedua\\OneDrive\\Escritorio\\MAESTRIA\\4to Trimestre\\INTRO. MINERIA DE DATOS\\Proyecto_Introduccion_Mineria_de_Datos\\DATA\\"
 
 
-
-#----------------LIMPIEZA DE LOS DATOS---------------------
-#-----------------------------------------------------------
+#---------------------------------------------------------------------------
+#----------------------LIMPIEZA DE LOS DATOS-------------------------------
+#---------------------------------------------------------------------------
 
 
 
@@ -169,7 +181,7 @@ data_completa <- bind_rows(data_2024, data_2023, data_2022, data_2021, data_2020
 
 
 # Reemplazo de valores por defecto "IGNORADO" según el diccionario de datos:
-# - Solo se aplican condiciones a las columnas g_hora, g_hora_5 y g_modelo_veh,
+#   Solo se aplican condiciones a las columnas g_hora, g_hora_5 y g_modelo_veh,
 #   ya que sus valores dependen de la información de otros campos.
 data_completa$g_hora <- ifelse(
                               data_completa$hora_ocu >= 0 & data_completa$hora_ocu <= 5, 1,
@@ -219,23 +231,24 @@ rm(data_2024, data_2023, data_2022, data_2021, data_2020,data_2019, data_2018, d
 
 
 
-
-#----------------ALGORITMO APRIORI--------------------------
-#-----------------------------------------------------------
+#---------------------------------------------------------------------------
+#-----------------------ALGORITMO APRIORI-----------------------------------
+#---------------------------------------------------------------------------
 
 #Data del departamento de Guatemala
 data_gt <- subset(data_completa,depto_ocu==1)
 data.frame(1:ncol(data_gt), colnames(data_gt))
 data_gt<-data_gt[,-9]
 
-#Patrón 1: Hechos de transito en las horas pico en Guatemala
+#Patrón 1: Hechos de tránsito en las horas pico en el departamento de Guatemala 
 aprio_p1 <- subset(data_gt, (hora_ocu >= 5 & hora_ocu <= 9) | (hora_ocu >= 16 & hora_ocu <= 20))
 aprio_p1 <- aprio_p1[, c("g_hora_5","mes_ocu","dia_sem_ocu","tipo_veh","tipo_eve")]
 reglas_apr_p1 <- apriori(aprio_p1, parameter = list(support=0.25, confidence = 0.45)) 
 inspect(reglas_apr_p1[0:23])
 
 
-#Patron 2: Hecho de transito provocados por el tipo de vehiculo: Motocicleta a nivel general
+
+#Patron 2: Hechos de tránsito provocados por el tipo de vehículo: Motocicleta 
 aprio_p2 <- subset(data_completa, tipo_veh==4)
 aprio_p2 <- aprio_p2[, c("g_hora_5", "tipo_eve","mes_ocu","dia_sem_ocu","depto_ocu")]
 reglas_apr_p2 <- apriori(aprio_p2, parameter = list(support=0.20, confidence = 0.45))
@@ -243,21 +256,21 @@ inspect(reglas_apr_p2[0:17])
 
 
 
-#Patron 3: Hecho de transito en zonas activas en los fines de semana en Guatemala
+#Patron 3: Hechos de tránsito en zonas activas (zona 1,4,10,15)  los fines de semana en el departamento de Guatemala
 aprio_p3 <- subset(data_gt, zona_ocu %in% c(4,10,15,1) & dia_sem_ocu %in% c(6,7))
 aprio_p3 <- aprio_p3[, c("mes_ocu", "g_hora", "tipo_veh", "tipo_eve")]
 reglas_apr_p3 <- apriori(aprio_p3, parameter = list(support=0.20, confidence=0.45))
 inspect(reglas_apr_p3[0:23])
 
 
-#Patron 4: Hechos de transito cuando es atropello a nivel general
+#Patron 4: Hechos de tránsito con tipo de incidente “atropello”.
 aprio_p4 <- subset(data_completa, tipo_eve == 5)
 aprio_p4 <- aprio_p4[, c("mes_ocu", "g_hora","tipo_veh","depto_ocu")]
 reglas_apr_p4 <- apriori(aprio_p4, parameter = list(support=0.10, confidence = 0.35))
 inspect(reglas_apr_p4[0:42])
 
 
-#Patron 5: Hechos de transito en el Municipio de San Miguel Petapa, Guatemala
+#Patron 5: Hechos de tránsito en el municipio de San Miguel Petapa, Guatemala 
 aprio_p5 <- subset(data_completa, mupio_ocu == 117)
 aprio_p5 <- aprio_p5[, c("g_hora","mes_ocu","dia_sem_ocu","tipo_veh","tipo_eve")]
 reglas_apr_p5 <- apriori(aprio_p5, parameter = list(support=0.20, confidence=0.45))
@@ -275,18 +288,19 @@ inspect(reglas_apr_p5[0:37])
 
 
 
-#----------------ALGORITMO FP-GROWTH------------------------
-#-----------------------------------------------------------
+#---------------------------------------------------------------------------
+#-----------------------ALGORITMO FP-GROWTH---------------------------------
+#---------------------------------------------------------------------------
 
-#Patron 1: Hechos de transito en temporada de lluvia (junio a octubre)
+#Patron 1:  Hechos de tránsito en temporada de lluvias (junio-octubre) 
 fp_p1 <- subset(data_completa, mes_ocu %in% c(6,7,8,9,10))
-fp_p1 <- fp_p1[, c("mes_ocu","depto_ocu","g_hora_5","color_veh","tipo_veh","tipo_eve")]
+fp_p1 <- fp_p1[, c("depto_ocu","g_hora_5","color_veh","tipo_veh","tipo_eve")]
 reglas_fp_p1 <- fim4r(fp_p1, method="fpgrowth", target ="rules", supp =.2, conf=.5)
 rf_fp_p1 <- as(reglas_fp_p1, "data.frame")
 
 
 
-#Patron 2: Hechos de transito con vehículos nuevos (modelos recientes)
+#Patron 2:  Hechos de tránsito con vehículos de modelo reciente (2020 - 2029) 
 fp_p2 <- subset(data_completa, g_modelo_veh ==6)
 fp_p2 <- fp_p2[, c("dia_sem_ocu","marca_veh","g_hora_5","tipo_veh","tipo_eve")]
 reglas_fp_p2 <- fim4r(fp_p2, method="fpgrowth", target ="rules", supp =.2, conf=.5)
@@ -295,7 +309,7 @@ rf_fp_p2 <- as(reglas_fp_p2, "data.frame")
 
 
 
-#Patron 3: Hechos de transito ocurrido en la noche.
+#Patron 3: Hechos de tránsito ocurrido en la noche. 
 fp_p3 <- subset(data_completa, g_hora_5 ==3)
 fp_p3 <- fp_p3[, c("mes_ocu","depto_ocu","color_veh","tipo_veh","tipo_eve")]
 reglas_fp_p3 <- fim4r(fp_p3, method="fpgrowth", target ="rules", supp =.2, conf=.5)
@@ -304,23 +318,23 @@ rf_fp_p3 <- as(reglas_fp_p3, "data.frame")
 
 
 
-#Patron 4: Hechos de tránsito relacionados segun el color del vehículo (Claro, oscuro, vivo, Varios)
-fp_p4 <- subset(data_completa, color_veh <=17)
+#Patron 4: Hechos de tránsito relacionados según el color del vehículo (Claro, oscuro, vivo, otros). 
+fp_p4 <- subset(data_completa, color_veh <=17 & (hora_ocu >= 0 & hora_ocu <= 24))
 
 fp_p4$grupo_color <- ifelse(fp_p4$color_veh %in% c(3,4,5,9,10,15), "Oscuro",
                             ifelse(fp_p4$color_veh %in% c(2,8,11,12,13,16), "Claro",
                                    ifelse(fp_p4$color_veh %in% c(1,6,7,14), "Vivo",
-                                          ifelse(fp_p4$color_veh == 17, "Varios", NA))))
+                                          ifelse(fp_p4$color_veh == 17, "Otros", NA))))
 
-fp_p4 <- fp_p4[, c("grupo_color", "g_hora_5", "tipo_eve")]
+fp_p4 <- fp_p4[, c("mes_ocu","grupo_color", "hora_ocu", "tipo_eve")]
 reglas_fp_p4 <- fim4r(fp_p4, method="fpgrowth", target ="rules", supp =.2, conf=.5)
 rf_fp_p4 <- as(reglas_fp_p4, "data.frame")
 
 
 
 
-#Patron 5: Hechos de transito provocados por los buses extraurbano
-fp_p5 <- subset(data_completa, tipo_veh  ==7)
+#Patron 5: Hechos de tránsito provocados por los buses extraurbano 
+fp_p5 <- subset(data_completa, tipo_veh  ==7 & depto_ocu<=22)
 fp_p5 <- fp_p5[, c("mes_ocu","depto_ocu","g_hora_5","tipo_eve")]
 reglas_fp_p5 <- fim4r(fp_p5, method="fpgrowth", target ="rules", supp =.2, conf=.5)
 rf_fp_p5 <- as(reglas_fp_p5, "data.frame")
@@ -329,10 +343,18 @@ rf_fp_p5 <- as(reglas_fp_p5, "data.frame")
 
 
 
-#----------------ALGORITMO K-MEANS--------------------------
-#-----------------------------------------------------------
 
-#Cluster 1: Hechos de tránsito por el modelo del vehículo (1970-2030) y hora de ocurrencia (0-24 hrs)
+
+
+
+
+
+
+#---------------------------------------------------------------------------
+#------------------------ALGORITMO K-MEANS---------------------------------
+#---------------------------------------------------------------------------
+
+#Cluster 1: Hechos de tránsito por modelo de vehículo y hora de ocurrencia 
 km_c1 <- subset(data_completa, (modelo_veh >= 1970 & modelo_veh <= 2030) & (hora_ocu >= 0 & hora_ocu <= 24))
 km_c1 <- km_c1[, c("modelo_veh","color_veh","hora_ocu","g_hora_5","tipo_eve")]
 
@@ -364,7 +386,7 @@ ggplot(km_c1, aes(x = modelo_veh, y = hora_ocu, color = as.factor(cluster_1$clus
 
 
 
-#Cluster 2: Hechos de tránsito por automóviles en el departamento de Guatemala
+#Cluster 2: Distribución de hechos de tránsito por tipo de evento y hora de ocurrencia en el departamento de Guatemala para automóvil. 
 km_c2 <- subset(data_completa, (hora_ocu >= 0 & hora_ocu <= 24)  & tipo_eve<=8 & depto_ocu==1 & tipo_veh == 1)
 km_c2 <- km_c2[, c("hora_ocu", "g_hora_5", "tipo_eve")]
 cluster_2 <- kmeans(km_c2, centers = 6)
@@ -394,7 +416,7 @@ ggplot(km_c2, aes(x = tipo_eve, y = hora_ocu, color = as.factor(cluster_2$cluste
 
 
 
-#Cluster 3: Hechos de tránsito por año de ocurrencia y modelo del vehículo
+#Cluster 3: Hechos de tránsito por año de ocurrencia y modelo del vehículo 
 km_c3 <- subset(data_completa,modelo_veh >= 1970 & modelo_veh <= 2030)
 km_c3 <- km_c3[, c("anio_ocu","mes_ocu", "modelo_veh")]
 cluster_3 <- kmeans(km_c3, centers = 6)
@@ -426,7 +448,7 @@ ggplot(km_c3, aes(x = anio_ocu, y = modelo_veh, color = as.factor(cluster_3$clus
 
 
 
-#Cluster 4: Hechos de tránsito por modelo del vehiculo  y marca del vehiculo
+#Cluster 4: Hechos de tránsito por modelo del vehículo  y marca del vehículo 
 km_c4 <- subset(data_completa,(modelo_veh >= 1970 & modelo_veh <= 2030) &  tipo_eve<=8 & marca_veh!=999 )
 km_c4 <- km_c4[, c("anio_ocu", "modelo_veh","tipo_eve","marca_veh")]
 cluster_4 <- kmeans(km_c4, centers = 6)
@@ -457,7 +479,7 @@ ggplot(km_c4, aes(x = modelo_veh, y = marca_veh, color = as.factor(cluster_4$clu
 
 
 
-#Cluster 5: Hechos de tránsito por modelo del vehiculo  y tipo de evento
+#Cluster 5: Hechos de tránsito por modelo del vehículo  y tipo de evento 
 km_c5 <- subset(data_completa,(modelo_veh >= 1970 & modelo_veh <= 2030) &  tipo_eve<=8)
 km_c5 <- km_c5[, c("anio_ocu", "modelo_veh","tipo_eve")]
 cluster_5 <- kmeans(km_c5, centers = 8)
